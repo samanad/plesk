@@ -281,27 +281,43 @@ module.exports = { createServer };
 if (require.main === module) {
   const server = createServer();
   
-  // Start server
+  // Start server with better error handling
   const PORT = process.env.PORT || 3000;
-  server.listen(PORT, () => {
-    console.log(`🚀 Plesk Template server running on port ${PORT}`);
+  const HOST = process.env.HOST || '0.0.0.0';
+  
+  server.listen(PORT, HOST, () => {
+    console.log(`🚀 Plesk Template server running on ${HOST}:${PORT}`);
     console.log(`📖 Visit http://localhost:${PORT} to see the template`);
     console.log(`🔧 API available at http://localhost:${PORT}/api/status`);
+    console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
+  });
+
+  // Handle server errors
+  server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+      console.error(`❌ Port ${PORT} is already in use!`);
+      console.error(`💡 Try using a different port: PORT=3001 node src/index.js`);
+      console.error(`💡 Or kill the process using port ${PORT}: lsof -i :${PORT}`);
+      process.exit(1);
+    } else {
+      console.error('❌ Server error:', error);
+      process.exit(1);
+    }
   });
 
   // Graceful shutdown
   process.on('SIGTERM', () => {
-    console.log('SIGTERM received, shutting down gracefully');
+    console.log('🔄 SIGTERM received, shutting down gracefully');
     server.close(() => {
-      console.log('Server closed');
+      console.log('✅ Server closed');
       process.exit(0);
     });
   });
 
   process.on('SIGINT', () => {
-    console.log('SIGINT received, shutting down gracefully');
+    console.log('🔄 SIGINT received, shutting down gracefully');
     server.close(() => {
-      console.log('Server closed');
+      console.log('✅ Server closed');
       process.exit(0);
     });
   });
