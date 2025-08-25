@@ -1,65 +1,45 @@
-# 🚀 Server Deployment Guide
+# 🚀 Plesk Deployment Guide
 
 ## Quick Start
 
-### Option 1: Using npm scripts (Recommended)
+### Option 1: Using npm start (Recommended)
 ```bash
-# Start on default port 3000
+# Simply run - Plesk handles everything automatically
 npm start
-
-# Start on custom port
-PORT=3001 npm start
-
-# Start in production mode
-npm run start:prod
-
-# Start in development mode
-npm run start:dev
 ```
 
-### Option 2: Using the startup script
+### Option 2: Direct node command
 ```bash
-# Make script executable (first time only)
-chmod +x start-server.sh
-
-# Run the interactive startup script
-./start-server.sh
-```
-
-### Option 3: Direct node command
-```bash
-# Start on default port 3000
+# Plesk automatically assigns ports and handles routing
 node src/index.js
-
-# Start on custom port
-PORT=3001 node src/index.js
-
-# Start with specific host
-HOST=0.0.0.0 PORT=3000 node src/index.js
 ```
+
+## 🎯 Plesk Automatic Features
+
+✅ **Automatic Port Assignment** - Plesk assigns available ports automatically  
+✅ **Domain Routing** - Your app is automatically available via your domain  
+✅ **SSL/HTTPS Support** - Plesk handles SSL certificates automatically  
+✅ **Load Balancing** - Plesk can distribute traffic across multiple instances  
+✅ **Auto-restart** - Plesk restarts your app if it crashes  
+✅ **Log Management** - Centralized logging through Plesk panel
 
 ## Troubleshooting
 
 ### Port Already in Use (EADDRINUSE)
 If you get `EADDRINUSE: address already in use :::3000`:
 
-**Option 1: Use a different port**
-```bash
-PORT=3001 npm start
-```
+**✅ Plesk Solution (Recommended):**
+- Simply restart your application in the Plesk panel
+- Plesk will automatically assign a different port
+- No manual intervention needed
 
-**Option 2: Find and kill the process using port 3000**
+**Manual Solution (if needed):**
 ```bash
 # Find the process
 lsof -i :3000
 
 # Kill it (replace PID with actual process ID)
 kill -9 <PID>
-```
-
-**Option 3: Kill all Node.js processes (be careful!)**
-```bash
-pkill -f node
 ```
 
 ### File Not Found Errors
@@ -84,53 +64,70 @@ ls -la start-server.sh
 | `HOST` | 0.0.0.0 | Server host binding |
 | `NODE_ENV` | development | Environment mode |
 
-## Production Deployment
+## 🚀 Plesk Deployment
 
-### Using PM2 (Recommended for production)
+### Automatic Deployment (Recommended)
+1. **Upload your code** to `/var/www/vhosts/yourdomain.com/httpdocs/`
+2. **Install dependencies**: `npm install`
+3. **Start the application**: `npm start`
+4. **Plesk handles everything else automatically!**
+
+### Plesk Panel Configuration
+1. **Go to Domains** → **yourdomain.com** → **Node.js**
+2. **Enable Node.js** for your domain
+3. **Set Document Root** to `/httpdocs`
+4. **Set Application Root** to `/httpdocs`
+5. **Set Application URL** to `/`
+6. **Set Node.js Version** to 16 or higher
+7. **Set Application Startup File** to `src/index.js`
+8. **Click Enable**
+
+### Environment Variables in Plesk
+Plesk automatically sets these environment variables:
+- `VIRTUAL_HOST` - Your domain name
+- `VIRTUAL_PORT` - Assigned port
+- `DOMAIN` - Your domain
+- `SSL` - SSL status
+- `PROXY` - Proxy configuration
+
+### Manual Deployment (Alternative)
+If you prefer manual control:
+
 ```bash
-# Install PM2 globally
-npm install -g pm2
+# Navigate to your domain directory
+cd /var/www/vhosts/yourdomain.com/httpdocs
+
+# Install dependencies
+npm install
 
 # Start the application
-pm2 start src/index.js --name "plesk-template"
+npm start
 
-# Monitor the application
-pm2 monit
-
-# View logs
-pm2 logs plesk-template
+# Plesk will automatically route traffic to your app
 ```
 
-### Using systemd service
-Create `/etc/systemd/system/plesk-template.service`:
-```ini
-[Unit]
-Description=Plesk Template Server
-After=network.target
+## 🌐 Plesk Domain Access
 
-[Service]
-Type=simple
-User=www-data
-WorkingDirectory=/var/www/vhosts/zeshk.com/httpdocs
-ExecStart=/usr/bin/node src/index.js
-Restart=always
-Environment=NODE_ENV=production
-Environment=PORT=3000
+### Automatic Domain Routing
+Once deployed in Plesk, your app is automatically available at:
+- **HTTP**: `http://yourdomain.com`
+- **HTTPS**: `https://yourdomain.com` (if SSL enabled)
 
-[Install]
-WantedBy=multi-user.target
-```
-
-Then enable and start:
+### Health Check via Domain
+Test if your server is running via your domain:
 ```bash
-sudo systemctl enable plesk-template
-sudo systemctl start plesk-template
-sudo systemctl status plesk-template
+# Check status
+curl http://yourdomain.com/api/status
+
+# Check info
+curl http://yourdomain.com/api/info
+
+# Check main page
+curl http://yourdomain.com/
 ```
 
-## Health Check
-
-Test if your server is running:
+### Local Health Check (Development)
+For local testing:
 ```bash
 # Check status
 curl http://localhost:3000/api/status

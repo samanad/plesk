@@ -1,3 +1,6 @@
+// Import Plesk configuration
+const pleskConfig = require('../plesk.config');
+
 module.exports = {
   // Application configuration
   app: {
@@ -8,11 +11,18 @@ module.exports = {
     repository: 'https://github.com/samanad/plesk'
   },
 
-  // Server configuration
+  // Server configuration - Fully Plesk compatible
   server: {
-    port: process.env.PORT || 3000,
-    host: process.env.HOST || '0.0.0.0',
-    environment: process.env.NODE_ENV || 'development'
+    port: pleskConfig.environment.port,
+    host: pleskConfig.environment.host,
+    environment: pleskConfig.environment.nodeEnv,
+    // Plesk specific configurations
+    plesk: {
+      domain: pleskConfig.environment.domain,
+      ssl: pleskConfig.environment.ssl,
+      proxy: pleskConfig.environment.proxy,
+      isPlesk: pleskConfig.isPlesk
+    }
   },
 
   // API configuration
