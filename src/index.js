@@ -285,7 +285,8 @@ if (require.main === module) {
   const config = require('./config');
   // Let Plesk assign any available port, don't default to 3000
   const PORT = process.env.PORT || process.env.VIRTUAL_PORT || 0; // 0 = let OS assign any free port
-  const HOST = config.server.host;
+  // Always bind to 0.0.0.0 (all interfaces) to avoid IP binding issues
+  const HOST = '0.0.0.0';
   const DOMAIN = config.server.plesk.domain;
   
   server.listen(PORT, HOST, () => {

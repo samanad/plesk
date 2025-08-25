@@ -8,7 +8,7 @@ const pleskConfig = {
   // Plesk environment variables
   environment: {
     port: process.env.PORT || process.env.VIRTUAL_PORT || 0, // Let Plesk assign any free port
-    host: process.env.HOST || process.env.VIRTUAL_HOST || '0.0.0.0',
+    host: '0.0.0.0', // Always bind to all interfaces
     domain: process.env.DOMAIN || process.env.VIRTUAL_HOST,
     ssl: process.env.SSL === 'true',
     proxy: process.env.PROXY === 'true',
