@@ -13,7 +13,7 @@ module.exports = {
 
   // Server configuration - Fully Plesk compatible
   server: {
-    port: pleskConfig.environment.port,
+    port: process.env.PORT || process.env.VIRTUAL_PORT || 0, // Let Plesk assign ports
     host: pleskConfig.environment.host,
     environment: pleskConfig.environment.nodeEnv,
     // Plesk specific configurations

@@ -281,18 +281,23 @@ module.exports = { createServer };
 if (require.main === module) {
   const server = createServer();
   
-  // Plesk-compatible server startup
+  // Plesk-compatible server startup - Let Plesk assign ports automatically
   const config = require('./config');
-  const PORT = config.server.port;
+  // Let Plesk assign any available port, don't default to 3000
+  const PORT = process.env.PORT || process.env.VIRTUAL_PORT || 0; // 0 = let OS assign any free port
   const HOST = config.server.host;
   const DOMAIN = config.server.plesk.domain;
   
   server.listen(PORT, HOST, () => {
+    // Get the actual port that was assigned (important for dynamic port assignment)
+    const actualPort = server.address().port;
+    
     console.log(`🚀 Plesk Template server started successfully!`);
-    console.log(`🌐 Server running on ${HOST}:${PORT}`);
+    console.log(`🌐 Server running on ${HOST}:${actualPort}`);
     console.log(`🏠 Domain: ${DOMAIN || 'Not configured'}`);
     console.log(`🔧 Environment: ${config.server.environment}`);
     console.log(`📖 Your app is now available via your domain!`);
+    console.log(`🔌 Port assigned: ${actualPort}`);
     
     // Plesk-specific information
     if (process.env.VIRTUAL_HOST) {
@@ -306,7 +311,7 @@ if (require.main === module) {
   // Handle server errors gracefully for Plesk
   server.on('error', (error) => {
     if (error.code === 'EADDRINUSE') {
-      console.error(`❌ Port ${PORT} is already in use`);
+      console.error(`❌ Port conflict detected`);
       console.error(`💡 Plesk will automatically assign a different port`);
       console.error(`💡 Or restart the application in Plesk panel`);
       process.exit(1);
