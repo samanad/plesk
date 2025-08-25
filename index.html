@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message Template</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        input[type="text"], 
+        input[type="email"], 
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus, 
+        input[type="email"]:focus, 
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .message-preview {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .preview-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+        
+        .preview-content {
+            line-height: 1.6;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 Message Template</h1>
+            <p>Enter your message details below</p>
+        </div>
+        
+        <form id="messageForm">
+            <div class="form-group">
+                <label for="title">Message Title:</label>
+                <input type="text" id="title" name="title" placeholder="Enter your message title here..." required>
+            </div>
+            
+            <div class="form-group">
+                <label for="author">Author Name:</label>
+                <input type="text" id="author" name="author" placeholder="Enter your name..." required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address:</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email..." required>
+            </div>
+            
+            <div class="form-group">
+                <label for="category">Category:</label>
+                <input type="text" id="category" name="category" placeholder="e.g., General, Support, Feedback..." required>
+            </div>
+            
+            <div class="form-group">
+                <label for="message">Your Message:</label>
+                <textarea id="message" name="message" placeholder="Type your message here... You can write as much as you want!" required></textarea>
+            </div>
+            
+            <button type="submit" class="submit-btn">📤 Submit Message</button>
+        </form>
+        
+        <div class="message-preview" id="preview" style="display: none;">
+            <div class="preview-title">📋 Message Preview:</div>
+            <div class="preview-content" id="previewContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('messageForm');
+        const preview = document.getElementById('preview');
+        const previewContent = document.getElementById('previewContent');
+        
+        // Show preview as user types
+        function updatePreview() {
+            const title = document.getElementById('title').value;
+            const author = document.getElementById('author').value;
+            const email = document.getElementById('email').value;
+            const category = document.getElementById('category').value;
+            const message = document.getElementById('message').value;
+            
+            if (title || author || email || category || message) {
+                preview.style.display = 'block';
+                previewContent.innerHTML = `
+                    <strong>Title:</strong> ${title || 'Not entered'}<br>
+                    <strong>Author:</strong> ${author || 'Not entered'}<br>
+                    <strong>Email:</strong> ${email || 'Not entered'}<br>
+                    <strong>Category:</strong> ${category || 'Not entered'}<br>
+                    <strong>Message:</strong> ${message || 'Not entered'}
+                `;
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+        
+        // Add event listeners for real-time preview
+        document.getElementById('title').addEventListener('input', updatePreview);
+        document.getElementById('author').addEventListener('input', updatePreview);
+        document.getElementById('email').addEventListener('input', updatePreview);
+        document.getElementById('category').addEventListener('input', updatePreview);
+        document.getElementById('message').addEventListener('input', updatePreview);
+        
+        // Handle form submission
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            const messageData = Object.fromEntries(formData);
+            
+            // Show success message
+            alert('✅ Message submitted successfully!\n\n' + 
+                  'Title: ' + messageData.title + '\n' +
+                  'Author: ' + messageData.author + '\n' +
+                  'Email: ' + messageData.email + '\n' +
+                  'Category: ' + messageData.category + '\n' +
+                  'Message: ' + messageData.message);
+            
+            // Clear form
+            form.reset();
+            preview.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
