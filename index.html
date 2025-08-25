@@ -108,6 +108,79 @@
             line-height: 1.6;
             color: #555;
         }
+        
+        /* Backend Message Styling */
+        .backend-message {
+            background: #e8f4fd;
+            border: 2px solid #2196f3;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .backend-title {
+            font-weight: bold;
+            font-size: 18px;
+            color: #1976d2;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .backend-content {
+            line-height: 1.6;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        /* Recent Submissions Styling */
+        .recent-submissions {
+            background: #f3e5f5;
+            border: 2px solid #9c27b0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .submissions-title {
+            font-weight: bold;
+            font-size: 18px;
+            color: #7b1fa2;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .submissions-content {
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .submission-item {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .submission-header {
+            font-weight: bold;
+            color: #7b1fa2;
+            margin-bottom: 8px;
+        }
+        
+        .submission-details {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .submission-message {
+            color: #333;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -149,6 +222,24 @@
         <div class="message-preview" id="preview" style="display: none;">
             <div class="preview-title">📋 Message Preview:</div>
             <div class="preview-content" id="previewContent"></div>
+        </div>
+        
+        <!-- Backend Editable Message Section -->
+        <div class="backend-message" style="margin-top: 30px;">
+            <div class="backend-title">📢 Important Message from Admin:</div>
+            <div class="backend-content" id="backendMessage">
+                <!-- This content will be loaded dynamically from the backend -->
+                Loading message...
+            </div>
+        </div>
+        
+        <!-- Recent Submissions Display -->
+        <div class="recent-submissions" style="margin-top: 30px;">
+            <div class="submissions-title">📥 Recent Message Submissions:</div>
+            <div class="submissions-content" id="recentSubmissions">
+                <!-- Recent submissions will be loaded here -->
+                <p>No submissions yet. Be the first to submit a message!</p>
+            </div>
         </div>
     </div>
 
@@ -193,6 +284,12 @@
             const formData = new FormData(form);
             const messageData = Object.fromEntries(formData);
             
+            // Add timestamp
+            messageData.timestamp = new Date().toISOString();
+            
+            // Save message to file (using fetch to a PHP endpoint)
+            saveMessageToFile(messageData);
+            
             // Show success message
             alert('✅ Message submitted successfully!\n\n' + 
                   'Title: ' + messageData.title + '\n' +
@@ -204,7 +301,120 @@
             // Clear form
             form.reset();
             preview.style.display = 'none';
+            
+            // Reload recent submissions
+            loadRecentSubmissions();
         });
+        
+        // Function to save message to file
+        function saveMessageToFile(messageData) {
+            // Create a simple text representation
+            const messageText = `
+=== NEW MESSAGE ===
+Date: ${new Date().toLocaleString()}
+Title: ${messageData.title}
+Author: ${messageData.author}
+Email: ${messageData.email}
+Category: ${messageData.category}
+Message: ${messageData.message}
+==================
+
+`;
+            
+            // Try to save to file using PHP endpoint
+            fetch('save_message.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(messageData)
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log('Message saved:', data);
+            })
+            .catch(error => {
+                console.error('Error saving message:', error);
+                // Fallback: save to localStorage
+                saveToLocalStorage(messageData);
+            });
+        }
+        
+        // Fallback: save to localStorage
+        function saveToLocalStorage(messageData) {
+            let messages = JSON.parse(localStorage.getItem('submittedMessages') || '[]');
+            messages.unshift(messageData);
+            // Keep only last 10 messages
+            messages = messages.slice(0, 10);
+            localStorage.setItem('submittedMessages', JSON.stringify(messages));
+        }
+        
+        // Load recent submissions
+        function loadRecentSubmissions() {
+            // Try to load from server first
+            fetch('get_messages.php')
+            .then(response => response.json())
+            .then(data => {
+                displaySubmissions(data);
+            })
+            .catch(error => {
+                console.error('Error loading messages:', error);
+                // Fallback: load from localStorage
+                loadFromLocalStorage();
+            });
+        }
+        
+        // Display submissions
+        function displaySubmissions(messages) {
+            const container = document.getElementById('recentSubmissions');
+            
+            if (!messages || messages.length === 0) {
+                container.innerHTML = '<p>No submissions yet. Be the first to submit a message!</p>';
+                return;
+            }
+            
+            let html = '';
+            messages.forEach((msg, index) => {
+                html += `
+                    <div class="submission-item">
+                        <div class="submission-header">${msg.title}</div>
+                        <div class="submission-details">
+                            <strong>Author:</strong> ${msg.author} | 
+                            <strong>Category:</strong> ${msg.category} | 
+                            <strong>Date:</strong> ${new Date(msg.timestamp).toLocaleString()}
+                        </div>
+                        <div class="submission-message">${msg.message}</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // Load from localStorage (fallback)
+        function loadFromLocalStorage() {
+            const messages = JSON.parse(localStorage.getItem('submittedMessages') || '[]');
+            displaySubmissions(messages);
+        }
+        
+        // Load submissions when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRecentSubmissions();
+            loadBackendMessage();
+        });
+        
+        // Load backend message
+        function loadBackendMessage() {
+            fetch('get_backend_message.php')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('backendMessage').innerHTML = data;
+            })
+            .catch(error => {
+                console.error('Error loading backend message:', error);
+                document.getElementById('backendMessage').innerHTML = 'Welcome to our message board! This is a sample message that you can edit in the backend. Feel free to update this text with your own announcements, updates, or important information.';
+            });
+        }
     </script>
 </body>
 </html>
